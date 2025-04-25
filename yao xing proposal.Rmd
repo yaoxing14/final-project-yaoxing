@@ -19,7 +19,7 @@ The original data comes from the open source records on the official website of 
 
 ## Data
 
-***I analyzed using `data/aac_small.csv`, which contains the following variables***
+***I first used aac_intakes_outcomes.csv (combining intakes + outcomes), then filtered out 10 core variables and randomly sampled 5,000 records to generate data/aac_small.csv for subsequent analysis.***
 
 - `animal_type`: Type of pets in the shelter (Cat and Dog)
 - `breed`: Pet breed
