@@ -1,0 +1,130 @@
+---
+title: "Final Project"
+author: "Yao Xing Qian"
+output:
+  xaringan::moon_reader:
+    seal: false
+---
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(broom)
+library(knitr)
+
+aac <- read_csv("data/aac_small.csv") %>%
+  mutate(
+    outcome_binary = if_else(outcome_type=="Adoption","Adopted","Not Adopted"),
+    outcome01       = if_else(outcome_type=="Adoption", 1, 0)
+  )
+```
+# Pet Adoption Analysis
+
+![](images/pets.jpg)
+
+### Yao Xing Qian • April 2025  
+#### DSCI 151ONL1 Data Science for Beginners
+---
+
+# Research Question
+
+What characteristics of pets make them more likely to find new homes?
+
+---
+
+# Data & Sample
+
+Sample: 5,000 records from data/aac_small.csv
+10 variables
+
+- `animal_type`: Type of pets in the shelter (Cat and Dog)
+- `breed`: Pet breed
+- `sex_upon_intake`: Sex and neuter status of the animal when it enters the shelter
+- `sex_upon_outcome`: Sex and neuter status of the animal when it leaves the shelter
+- `age_upon_intake`: Age of the animal when it enters the shelter
+- `age_upon_outcome`: Age of the animal when it leaves the shelter
+- `intake_type`: How the animal entered the shelter (Stray, Owner Surrender, etc.)
+- `intake_condition`: Physical condition of the animal when it entered the shelter
+- `outcome_type`: Final outcome (Adopted, Transferred, etc.)
+- `time_in_shelter_days`: Number of days the animal stayed in the shelter
+
+---
+
+# Exploratory Analysis
+
+Here’s what I looked at first to get a feel for the data:
+
+- Adoption rate by pet type, breed, sex at intake  
+
+- Distribution of days in shelter by outcome  
+
+- Intake method vs. adoption outcome
+
+---
+
+# Adoption Rate by Pet Type
+*Dogs are adopted at slightly higher rates than cats.*  
+
+<div style="text-align:center">
+
+```{r echo=FALSE, warning=FALSE, out.width="70%", fig.height=6}
+aac %>%
+  count(animal_type, outcome_binary) %>%
+  group_by(animal_type) %>%
+  mutate(prop = n/sum(n)) %>%
+  ggplot(aes(animal_type, prop, fill=outcome_binary)) +
+    geom_col(position="fill") +
+    labs(x="Pet Type", y="Adoption Rate", fill="Outcome") +
+    theme_minimal(base_size = 18)
+```
+
+---
+# Shelter Stay by Outcome
+
+<div style="text-align:center">
+
+```{r echo=FALSE, out.width="70%"}
+ggplot(aac, aes(outcome_binary, time_in_shelter_days)) +
+  geom_boxplot() +
+  labs(x = "Outcome", y = "Days in Shelter") +
+  theme_minimal(base_size = 16)
+```
+---
+
+# Intake Method vs Adoption
+
+<div style="text-align:center">
+
+```{r echo=FALSE}
+freq_table <- aac %>%
+  count(intake_type, outcome_binary) %>%
+  pivot_wider(names_from = outcome_binary, values_from = n, values_fill = 0)
+knitr::kable(freq_table) 
+```
+
+---
+# Logistic Regression Results
+
+```{r echo=FALSE}
+top_breeds <- aac %>% count(breed) %>% top_n(10, n) %>% pull(breed)  
+aac2 <- aac %>%  
+  mutate(  
+    breed2    = if_else(breed %in% top_breeds, breed, "Other"),  
+    outcome01  = if_else(outcome_type=="Adoption", 1, 0)  
+  )
+
+model2 <- glm(  
+  outcome01 ~ animal_type + sex_upon_intake + intake_type +  
+              intake_condition + time_in_shelter_days + breed2,  
+  data = aac2, family = "binomial"  
+)
+
+broom::tidy(model2) %>%  
+  filter(p.value < 0.05) %>%  
+  knitr::kable(digits = 3)
+```
+---
+# Conclusions
+
+- Neutered pets, good intake condition, and shorter stays → higher adoption odds  
+- Breed and age also play a role (puppies/kittens adopted faster)  
+- Intake method (Stray vs. Surrender) significantly affects outcome  
+
