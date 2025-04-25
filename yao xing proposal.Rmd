@@ -1,0 +1,73 @@
+---
+title: "Proposal"
+author: "Yaoxing Qian"
+date: "2025-04-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+For this project, I chose the public adoption data of Austin Animal Center, and wanted to know what factors affect whether cats and dogs can be adopted. In other words, my research question is: **What characteristics of pets make them more likely to find new homes? **
+
+I think this topic is very meaningful because I often see many pets that cannot be adopted on my social networking sites and are forced to be euthanized. If we can know which pets are more likely to be adopted in the adoption market, the shelter can do more targeted publicity and adjust the admission process, or it can also help me better promote pet adoption on social platforms to help more furry friends be adopted. :)
+
+The original data comes from the open source records on the official website of Austin Animal Center, which contains 79,672 cat and dog entry and exit information, with fields such as breed, sex and sterilization status (sex_upon_outcome), intake method (intake_type), final outcome (outcome_type), number of days in the shelter (time_in_shelter_days), etc. To make the analysis more focused, I randomly selected 5,000 samples of both cats and dogs, retaining the above key variables to facilitate my subsequent analysis.
+
+## Data
+
+***I analyzed using `data/aac_small.csv`, which contains the following variables***
+
+- `animal_type`: Type of pets in the shelter (Cat and Dog)
+- `breed`: Pet breed
+- `sex_upon_intake`: Sex and neuter status of the animal when it enters the shelter
+- `sex_upon_outcome`: Sex and neuter status of the animal when it leaves the shelter
+- `age_upon_intake`: Age of the animal when it enters the shelter
+- `age_upon_outcome`: Age of the animal when it leaves the shelter
+- `intake_type`: How the animal entered the shelter (Stray, Owner Surrender, etc.)
+- `intake_condition`: Physical condition of the animal when it entered the shelter
+- `outcome_type`: Final outcome (Adopted, Transferred, etc.)
+- `time_in_shelter_days`: Number of days the animal stayed in the shelter
+
+```{r}
+library(tidyverse)
+aac <- read_csv("data/aac_small.csv")
+glimpse(aac)
+```
+
+
+## Data Analysis Plan
+
+1. **Dependent variable (Y)**
+
+- `outcome_binary`: recode `outcome_type` into a binary variable (Adopted vs. Not Adopted)
+
+2. **Independent variable (X)**
+- `animal_type`: Type of pets in the shelter (Cat and Dog)
+- `breed`: Pet breed
+- `sex_upon_intake`: Sex and neuter status of the animal when it enters the shelter
+- `sex_upon_outcome`: Sex and neuter status of the animal when it leaves the shelter
+- `age_upon_intake`: Age of the animal when it enters the shelter
+- `age_upon_outcome`: Age of the animal when it leaves the shelter
+- `intake_type`: How the animal entered the shelter (Stray, Owner Surrender, etc.)
+- `intake_condition`: Physical condition of the animal when it entered the shelter
+- `outcome_type`: Final outcome (Adopted, Transferred, etc.)
+- `time_in_shelter_days`: Number of days the animal stayed in the shelter
+
+3. **Exploratory Analysis**  
+- Create a bar chart showing adoption rates by `animal_type`, `breed`, and `sex_upon_intake`.  
+- Generate a boxplot comparing the distribution of `time_in_shelter_days` between Adopted and Not Adopted groups.  
+- Create a simple frequency table that counts how many animals fall into each combination of intake method and adoption outcome, so can clearly see if different intake methods affect adoption rates.
+   
+4. **Statistical Methods**
+- I plan to use logistic regression (`glm(..., family = "binomial")`) to see how different factors affect the probability of animals being adopted, just like throwing all the independent variables into the model to see which one has the greatest effect on the result of "being adopted".
+- I may also do a frequency comparison of several categorical variables (such as a cross-tabulation of the way animals enter the shelter and the adoption results) to roughly see if there is any obvious correlation.
+
+5. **Anticipated Findings**
+
+- I would guess that pets that are neutered, in good condition when they enter the shelter, and have been in the shelter for a shorter period of time are more likely to be adopted.
+- Breed and age may also have an impact - for example, puppies and kittens may be more popular, or certain breeds may be more adoptable.
+
