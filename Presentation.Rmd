@@ -75,7 +75,25 @@ aac %>%
     labs(x="Pet Type", y="Adoption Rate", fill="Outcome") +
     theme_minimal(base_size = 18)
 ```
+---
+#Spay/Neuter Status vs. Adoption Rate
 
+<div style="text-align:center">
+
+```{r echo=FALSE, warning=FALSE, out.width="70%", fig.height=6}
+aac %>%
+  count(sex_upon_intake, outcome_binary) %>%
+  group_by(sex_upon_intake) %>%
+  mutate(prop = n/sum(n)) %>%
+  ggplot(aes(sex_upon_intake, prop, fill = outcome_binary)) +
+    geom_col(position = "fill") +
+    labs(x="Sex upon intake", y="Adoption Rate", fill="Outcome") +
+    theme_minimal(base_size = 16) +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+
+```
 ---
 # Shelter Stay by Outcome
 
@@ -127,4 +145,5 @@ broom::tidy(model2) %>%
 - Neutered pets, good intake condition, and shorter stays → higher adoption odds  
 - Breed and age also play a role (puppies/kittens adopted faster)  
 - Intake method (Stray vs. Surrender) significantly affects outcome  
+
 
